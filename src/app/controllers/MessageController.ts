@@ -18,6 +18,25 @@ class MessageController {
       message: "Message created",
     });
   }
+
+  async getByRoomId(req: Request, res: Response): Promise<Response> {
+    const { room_id } = req.query;
+
+    if (!room_id) {
+      throw new Error("Invalid room");
+    }
+
+    const messages = await prismaClient.message.findMany({
+      where: {
+        room_id: Number(room_id),
+      },
+      take: 10,
+    });
+
+    return res.json({
+      messages,
+    });
+  }
 }
 
 export const messageController = new MessageController();
