@@ -29,6 +29,40 @@ class RoomController {
     });
   }
 
+  async listByUserId(req: Request, res: Response): Promise<Response> {
+    const { user_id } = req.query;
+
+    if (!user_id) {
+      throw new Error("Invalid user");
+    }
+
+    const links = await prismaClient.linkUserRoom.findMany({
+      where: {
+        user_id: Number(user_id),
+      },
+    });
+
+    const rooms = await prismaClient.room.findMany({
+      where: {
+        id: {
+          in: links.map((link) => link.room_id),
+        },
+      },
+      include: {
+        Message: {
+          take: 1,
+          orderBy: {
+            date: "asc",
+          },
+        },
+      },
+    });
+
+    return res.json({
+      rooms,
+    });
+  }
+
   async linkUser(req: Request, res: Response): Promise<Response> {
     const { room_id, user_id_from, nickname } = req.body;
 
