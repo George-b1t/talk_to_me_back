@@ -19,7 +19,7 @@ class MessageController {
     });
   }
 
-  async getByRoomId(req: Request, res: Response): Promise<Response> {
+  async listByRoomId(req: Request, res: Response): Promise<Response> {
     const { room_id } = req.query;
 
     if (!room_id) {

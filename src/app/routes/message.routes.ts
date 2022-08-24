@@ -7,6 +7,6 @@ const messageRoutes = Router();
 messageRoutes.use(authMiddlewareController.execute);
 
 messageRoutes.post("/create", messageController.create);
-messageRoutes.get("/listByRoom", messageController.getByRoomId);
+messageRoutes.get("/listByRoom", messageController.listByRoomId);
 
 export { messageRoutes };

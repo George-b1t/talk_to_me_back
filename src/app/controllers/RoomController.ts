@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prismaClient } from "../../../prisma/prismaClient";
+import { io } from "../../server";
 
 class RoomController {
   async create(req: Request, res: Response): Promise<Response> {
