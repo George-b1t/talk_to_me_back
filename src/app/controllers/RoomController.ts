@@ -52,7 +52,7 @@ class RoomController {
         Message: {
           take: 1,
           orderBy: {
-            date: "asc",
+            date: "desc",
           },
         },
       },
