@@ -31,6 +31,13 @@ class MessageController {
         room_id: Number(room_id),
       },
       take: 10,
+      include: {
+        user: {
+          select: {
+            nickname: true,
+          },
+        },
+      },
     });
 
     return res.json({
