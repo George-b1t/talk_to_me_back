@@ -6,13 +6,14 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { router } from "./app/routes";
 import { getRoomsIdsByUser } from "./app/helpers/getRoomsIdsByUser";
+import { host } from "../host";
 
 const app = express();
 const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: `http://${host}:3000`,
   },
 });
 
@@ -29,16 +30,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 io.on("connection", (socket) => {
   socket.on("channel", async (user_id) => {
-    console.log(`User ${user_id} connected to socket`);
-
     const rooms = await getRoomsIdsByUser(user_id);
 
     socket.join(rooms);
   });
 
-  socket.on("chat message", ({ message, room_id }) => {
-    console.log({ message, room_id: String(room_id) });
-    io.to(String(room_id)).emit("chat message", { message });
+  socket.on("chat message", ({ message }) => {
+    io.to(String(message.room_id)).emit("chat message", message);
   });
 });
 
