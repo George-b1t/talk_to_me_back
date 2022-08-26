@@ -1,3 +1,3 @@
-const host = "192.168.0.6";
+const host = "localhost";
 
 export { host };

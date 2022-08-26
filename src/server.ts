@@ -5,8 +5,9 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { router } from "./app/routes";
-import { getRoomsIdsByUser } from "./app/helpers/getRoomsIdsByUser";
 import { host } from "../host";
+import { getUsersIdsByRoom } from "./app/helpers/getUsersIdsByRoom";
+import { getUserIdByNickname } from "./app/helpers/getUserIdByNickname";
 
 const app = express();
 const server = http.createServer(app);
@@ -29,14 +30,23 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 io.on("connection", (socket) => {
-  socket.on("channel", async (user_id) => {
-    const rooms = await getRoomsIdsByUser(user_id);
-
-    socket.join(rooms);
+  socket.on("rooms", async (user_id) => {
+    socket.join(String(user_id));
   });
 
-  socket.on("chat message", ({ message }) => {
-    io.to(String(message.room_id)).emit("chat message", message);
+  socket.on("new_room", ({ room }) => {
+    io.to(String(room.LinkUserRoom[0].user_id)).emit("room", room);
+  });
+
+  socket.on("new_room_user", async ({ nickname, room }) => {
+    const user_id = await getUserIdByNickname(nickname);
+
+    io.to(String(user_id)).emit("room", room);
+  });
+
+  socket.on("chat message", async ({ message }) => {
+    const ids = await getUsersIdsByRoom(message.room_id);
+    io.to(ids).emit("chat message", message);
   });
 });
 

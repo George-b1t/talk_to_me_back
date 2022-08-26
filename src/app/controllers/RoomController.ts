@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import { prismaClient } from "../../../prisma/prismaClient";
-import { io } from "../../server";
 
 class RoomController {
   async create(req: Request, res: Response): Promise<Response> {
     const { name, is_private, user_id } = req.body;
 
     if (!name || !user_id || (is_private !== false && is_private !== true)) {
-      throw new Error("Empty filed");
+      throw new Error("Empty field");
     }
 
     const createdRoom = await prismaClient.room.create({
@@ -17,7 +16,7 @@ class RoomController {
       },
     });
 
-    await prismaClient.linkUserRoom.create({
+    const createdLink = await prismaClient.linkUserRoom.create({
       data: {
         is_adm: true,
         user_id,
@@ -27,6 +26,13 @@ class RoomController {
 
     return res.json({
       message: "Room created successfully",
+      content: {
+        createdRoom: {
+          ...createdRoom,
+          Message: [],
+          LinkUserRoom: [createdLink],
+        },
+      },
     });
   }
 
@@ -52,6 +58,13 @@ class RoomController {
       include: {
         Message: {
           take: 1,
+          include: {
+            user: {
+              select: {
+                nickname: true,
+              },
+            },
+          },
           orderBy: {
             date: "desc",
           },
@@ -68,12 +81,13 @@ class RoomController {
     const { room_id, user_id_from, nickname } = req.body;
 
     if (!room_id || !user_id_from || !nickname) {
-      throw new Error("Empty filed");
+      throw new Error("Empty field");
     }
 
-    const findLinkCreator = await prismaClient.linkUserRoom.findUnique({
+    const findLinkCreator = await prismaClient.linkUserRoom.findFirst({
       where: {
-        id: user_id_from,
+        user_id: user_id_from,
+        room_id: room_id,
       },
     });
 
