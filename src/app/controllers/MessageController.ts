@@ -15,6 +15,7 @@ class MessageController {
       include: {
         user: {
           select: {
+            id: true,
             nickname: true,
           },
         },
@@ -44,6 +45,7 @@ class MessageController {
       include: {
         user: {
           select: {
+            id: true,
             nickname: true,
           },
         },

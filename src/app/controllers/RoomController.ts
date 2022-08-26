@@ -61,6 +61,7 @@ class RoomController {
           include: {
             user: {
               select: {
+                id: true,
                 nickname: true,
               },
             },
@@ -91,7 +92,21 @@ class RoomController {
       },
     });
 
-    if (!findLinkCreator?.is_adm) {
+    if (!findLinkCreator) {
+      throw new Error("User creator not found");
+    }
+
+    const room = await prismaClient.room.findUnique({
+      where: {
+        id: room_id,
+      },
+    });
+
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    if (!findLinkCreator.is_adm && room.is_private) {
       throw new Error("No permission");
     }
 
@@ -103,6 +118,17 @@ class RoomController {
 
     if (!findLinkUser) {
       throw new Error("No user found");
+    }
+
+    const linkUserAlreadyExists = await prismaClient.linkUserRoom.findFirst({
+      where: {
+        room_id,
+        user_id: findLinkUser.id,
+      },
+    });
+
+    if (linkUserAlreadyExists) {
+      throw new Error("User is already linked");
     }
 
     await prismaClient.linkUserRoom.create({
